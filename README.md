@@ -142,14 +142,22 @@ npm start
 1.Get all books
 ![Get all books](images/getbook.png)
 
+
+
 2.Get book by ID
 ![Get book by ID](images/getbookbyid.png)
+
+
 
 3.Create a new book
 ![Create a new book](images/createbook.png)
 
+
+
 4.Update book info
 ![Update book info](images/updatebookinfo.png)
+
+
 
 5.Delete a book
 ![Delete a book](images/Deletebook.png)
