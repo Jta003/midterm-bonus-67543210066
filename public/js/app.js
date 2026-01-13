@@ -15,14 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // ---------------------- Event Listeners ----------------------
 function setupEventListeners() {
     document.getElementById('add-btn').addEventListener('click', showAddModal);
-    
+
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const filter = e.target.dataset.filter;
             filterBooks(filter);
         });
     });
-    
+
     document.querySelector('.close').addEventListener('click', closeModal);
     document.getElementById('cancel-btn').addEventListener('click', closeModal);
     document.getElementById('book-form').addEventListener('submit', handleSubmit);
@@ -32,18 +32,18 @@ function setupEventListeners() {
 async function loadBooks(status = null) {
     try {
         showLoading();
-        
+
         let url = API_BASE;
         if (status && status !== 'all') url += `?status=${status}`;
         console.log("Fetching books from URL:", url);
-        
+
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch books');
         const data = await res.json();
-        
+
         displayBooks(data.books);
         updateStatistics(data.statistics);
-        
+
         hideLoading();
     } catch (error) {
         console.error('Error:', error);
@@ -55,12 +55,12 @@ async function loadBooks(status = null) {
 // ---------------------- Display Books ----------------------
 function displayBooks(books) {
     const container = document.getElementById('book-list');
-    
+
     if (books.length === 0) {
         container.innerHTML = '<div class="no-books">📚 No books found</div>';
         return;
     }
-    
+
     container.innerHTML = books.map(book => createBookCard(book)).join('');
 }
 
@@ -75,10 +75,10 @@ function createBookCard(book) {
                 ${book.status === 'available' ? '✅' : '📖'} ${book.status.toUpperCase()}
             </span>
             <div class="actions">
-                ${book.status === 'available' 
-                    ? `<button class="btn btn-success" onclick="borrowBook(${book.id})">Borrow</button>`
-                    : `<button class="btn btn-warning" onclick="returnBook(${book.id})">Return</button>`
-                }
+                ${book.status === 'available'
+            ? `<button class="btn btn-success" onclick="borrowBook(${book.id})">Borrow</button>`
+            : `<button class="btn btn-warning" onclick="returnBook(${book.id})">Return</button>`
+        }
                 <button class="btn btn-secondary" onclick="editBook(${book.id})">Edit</button>
                 <button class="btn btn-danger" onclick="deleteBook(${book.id})">Delete</button>
             </div>
@@ -96,12 +96,12 @@ function updateStatistics(stats) {
 // ---------------------- Filter Books ----------------------
 function filterBooks(status) {
     currentFilter = status;
-    
+
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
         if (btn.dataset.filter === status) btn.classList.add('active');
     });
-    
+
     loadBooks(status === 'all' ? null : status);
 }
 
@@ -178,34 +178,34 @@ async function getBookById(id) {
 }
 
 async function deleteBook(id) {
-    console.log(`Updating book ID ${id}:`, bookData);
-    try {
-        // 1. ดึงข้อมูลหนังสือก่อน
-        const book = await getBookById(id);
+    console.log("Deleting book ID:", id);
 
-        // 2. ตรวจสอบสถานะ
-        if (book.status === 'borrowed') {
-            alert('❌ Cannot delete: This book is currently borrowed.');
-            return; // ออกเลย ไม่ส่ง request ลบ
-        }
-
-        // 3. Confirm กับผู้ใช้
-        if (!confirm('Are you sure you want to delete this book?')) return;
-
-        // 4. ส่ง request ลบ
-        const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('Failed to delete book');
-
-        alert('Book deleted successfully!');
-        loadBooks(currentFilter === 'all' ? null : currentFilter);
-
-    } catch (error) {
-        console.error('Error deleting book:', error);
-        alert('Error deleting book: ' + error.message);
+    // ดึงข้อมูลหนังสือก่อนตรวจสอบ
+    const bookRes = await fetch(`${API_BASE}/${id}`);
+    if (!bookRes.ok) {
+        alert('Cannot fetch book info');
+        return;
     }
+    const book = await bookRes.json();
+
+    // ตรวจสอบสถานะ Borrow
+    if (book.status === 'borrowed') {
+        alert('Cannot delete this book because it is currently borrowed!');
+        return;
+    }
+
+    if (!confirm('Are you sure you want to delete this book?')) return;
+
+    const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+        alert('Failed to delete book!');
+        throw new Error('Failed to delete book');
+    }
+
+    console.log("Book deleted:", id);
+    alert('Book deleted successfully!');
+    loadBooks(currentFilter === 'all' ? null : currentFilter);
 }
-
-
 // ---------------------- Borrow / Return ----------------------
 async function borrowBook(id) {
     console.log("Borrowing book ID:", id);
