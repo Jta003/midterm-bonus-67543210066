@@ -35,6 +35,7 @@ async function loadBooks(status = null) {
         
         let url = API_BASE;
         if (status && status !== 'all') url += `?status=${status}`;
+        console.log("Fetching books from URL:", url);
         
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch books');
@@ -149,6 +150,7 @@ async function handleSubmit(event) {
 
 // ---------------------- CRUD API Calls ----------------------
 async function createBook(bookData) {
+    console.log("Creating book:", bookData);
     const res = await fetch(API_BASE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -159,6 +161,7 @@ async function createBook(bookData) {
 }
 
 async function updateBook(id, bookData) {
+    console.log(`Updating book ID ${id}:`, bookData);
     const res = await fetch(`${API_BASE}/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -175,6 +178,7 @@ async function getBookById(id) {
 }
 
 async function deleteBook(id) {
+    console.log(`Updating book ID ${id}:`, bookData);
     if (!confirm('Are you sure?')) return;
     const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Failed to delete book');
@@ -184,6 +188,7 @@ async function deleteBook(id) {
 
 // ---------------------- Borrow / Return ----------------------
 async function borrowBook(id) {
+    console.log("Borrowing book ID:", id);
     if (!confirm('Do you want to borrow this book?')) return;
     const res = await fetch(`${API_BASE}/${id}/borrow`, { method: 'PATCH' });
     if (!res.ok) throw new Error('Failed to borrow book');
@@ -192,6 +197,7 @@ async function borrowBook(id) {
 }
 
 async function returnBook(id) {
+    console.log("Returning book ID:", id);
     if (!confirm('Do you want to return this book?')) return;
     const res = await fetch(`${API_BASE}/${id}/return`, { method: 'PATCH' });
     if (!res.ok) throw new Error('Failed to return book');
@@ -201,6 +207,7 @@ async function returnBook(id) {
 
 // ---------------------- Edit Book ----------------------
 async function editBook(id) {
+    console.log("Editing book ID:", id);
     try {
         const book = await getBookById(id);
         document.getElementById('modal-title').textContent = 'Edit Book';
