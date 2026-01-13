@@ -179,12 +179,32 @@ async function getBookById(id) {
 
 async function deleteBook(id) {
     console.log(`Updating book ID ${id}:`, bookData);
-    if (!confirm('Are you sure?')) return;
-    const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('Failed to delete book');
-    alert('Book deleted successfully!');
-    loadBooks(currentFilter === 'all' ? null : currentFilter);
+    try {
+        // 1. ดึงข้อมูลหนังสือก่อน
+        const book = await getBookById(id);
+
+        // 2. ตรวจสอบสถานะ
+        if (book.status === 'borrowed') {
+            alert('❌ Cannot delete: This book is currently borrowed.');
+            return; // ออกเลย ไม่ส่ง request ลบ
+        }
+
+        // 3. Confirm กับผู้ใช้
+        if (!confirm('Are you sure you want to delete this book?')) return;
+
+        // 4. ส่ง request ลบ
+        const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete book');
+
+        alert('Book deleted successfully!');
+        loadBooks(currentFilter === 'all' ? null : currentFilter);
+
+    } catch (error) {
+        console.error('Error deleting book:', error);
+        alert('Error deleting book: ' + error.message);
+    }
 }
+
 
 // ---------------------- Borrow / Return ----------------------
 async function borrowBook(id) {
